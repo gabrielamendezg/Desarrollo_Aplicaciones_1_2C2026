@@ -1,0 +1,30 @@
+name: CI
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: 21
+
+      - uses: gradle/actions/setup-gradle@v6
+
+      - name: Verificar que domain no dependa de Android
+        run: |
+          if grep -rnE '^import androidx?\.' app/src/main/java/ar/edu/uade/piotask/domain; then
+            echo "La capa domain debe ser Kotlin puro"
+            exit 1
+          fi
+
+      - name: Compilar, testear y correr lint
+        run: ./gradlew build
