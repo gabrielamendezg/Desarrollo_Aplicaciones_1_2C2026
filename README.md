@@ -34,6 +34,29 @@ app/src/main/java/ar/edu/uade/piotask/
 
 Las dependencias apuntan hacia `domain`, que no conoce Android. CI falla si esa capa importa `android` o `androidx`.
 
+## Estado del proyecto
+
+La app todavía no tiene pantallas de usuario ni guarda datos: hoy muestra solo una pantalla inicial.
+
+| Área | Estado |
+|---|---|
+| Base del proyecto, Hilt y CI | Hecho |
+| Reglas de atención, puntaje y top N (`domain/`) | Hecho, con tests; fórmula pendiente de aprobación |
+| Persistencia con Room y DataStore (`data/`) | Pendiente |
+| Pantallas Compose (`presentation/`) | Pendiente |
+| Widget y reevaluación diaria | Pendiente |
+| Validación con usuarios y caso de negocio | Pendiente |
+
+## Reglas de atención
+
+Los estados, la fórmula del puntaje, el orden y la posposición están en [docs/reglas-atencion.md](docs/reglas-atencion.md). Los umbrales y los pesos todavía no están validados con usuarios.
+
+Para correr los tests del dominio:
+
+```bash
+./gradlew testDebugUnitTest
+```
+
 ## Forma de trabajo
 
 - **Ramas:** `main` estable, `develop` de integración y `feature/...`, `chore/...`, `test/...` o `docs/...` para cada cambio.
