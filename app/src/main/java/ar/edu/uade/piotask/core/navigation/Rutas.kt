@@ -5,6 +5,7 @@ object Rutas {
     const val NIDO = "nido"
     const val AJUSTES = "ajustes"
     const val NUEVA_TAREA = "nueva_tarea"
+    const val ONBOARDING = "onboarding"
 
     const val ARG_TAREA_ID = "tareaId"
     const val DETALLE = "detalle/{$ARG_TAREA_ID}"

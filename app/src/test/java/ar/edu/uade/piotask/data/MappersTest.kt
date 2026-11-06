@@ -25,7 +25,7 @@ class MappersTest {
 
     @Test
     fun `una categoria y una actividad sobreviven al viaje`() {
-        val categoria = Categoria(2, "Arte", "#DB2777")
+        val categoria = Categoria(2, "Arte", "#B0407A")
         val actividad = Actividad(4, 3, Instant.parse("2026-11-02T10:00:00Z"), TipoActividad.AVANCE, 60)
 
         assertEquals(categoria, categoria.toEntity().toDomain())

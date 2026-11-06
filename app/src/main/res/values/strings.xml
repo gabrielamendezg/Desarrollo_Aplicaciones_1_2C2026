@@ -85,4 +85,84 @@
     <string name="editar_titulo">Editar tarea</string>
     <string name="eliminar_confirmar_titulo">¿Eliminar esta tarea?</string>
     <string name="eliminar_confirmar_texto">Se borra junto con su historial y no se puede deshacer.</string>
+
+    <string name="seccion_rama">RAMA</string>
+    <string name="seccion_nido">NIDO</string>
+    <plurals name="rama_titulo">
+        <item quantity="one">%1$d pájaro despierto · %2$d descansan en el Nido</item>
+        <item quantity="other">%1$d pájaros despiertos · %2$d descansan en el Nido</item>
+    </plurals>
+    <string name="rama_meta_reclamando">%1$d reclamando</string>
+    <string name="rama_meta_despiertos">%1$d despiertos</string>
+    <string name="rama_meta_nido">%1$d en el Nido</string>
+    <plurals name="rama_pie_nido">
+        <item quantity="one">%1$d tarea descansa en el Nido</item>
+        <item quantity="other">%1$d tareas descansan en el Nido</item>
+    </plurals>
+    <string name="rama_tranquilo_titulo">Todo tranquilo</string>
+    <string name="rama_tranquilo_sub">Ningún pájaro necesita atención ahora.</string>
+    <string name="rama_tranquilo_cuerpo">Tus %1$d tareas descansan en el Nido. Cuando alguna despierte, va a aparecer acá y en tu widget.</string>
+    <string name="rama_ver_nido">Ver el Nido</string>
+    <string name="rama_error_titulo">No pudimos leer tus tareas</string>
+    <string name="rama_error_detalle">Tus datos siguen guardados en el teléfono. Probá de nuevo; si persiste, reiniciá la app.</string>
+    <string name="rama_categoria_vacia">No hay tareas despiertas en esta categoría.</string>
+    <string name="tarjeta_meta">%1$s · %2$s · %3$d%%</string>
+    <string name="tarjeta_meta_sin_categoria">%1$s · %2$d%%</string>
+    <plurals name="nido_titulo">
+        <item quantity="one">%1$d pájaro durmiendo</item>
+        <item quantity="other">%1$d pájaros durmiendo</item>
+    </plurals>
+    <string name="nido_subtitulo">No necesitan tu atención. Siguen guardados.</string>
+    <string name="accion_completar_tarea">Completar tarea</string>
+    <string name="detalle_progreso">Progreso</string>
+    <string name="detalle_ultimo_avance_titulo">Último avance</string>
+    <string name="detalle_creada_titulo">Creada</string>
+    <string name="detalle_hoy">hoy</string>
+    <plurals name="detalle_hace">
+        <item quantity="one">hace %1$d día</item>
+        <item quantity="other">hace %1$d días</item>
+    </plurals>
+    <string name="hoja_avance_aviso">Guardar reinicia los días sin avance. Si la tarea ya no necesita atención, el pájaro se duerme y pasa al Nido.</string>
+    <string name="hoja_avance_guardar">Guardar avance</string>
+    <string name="pos_confirmar">Posponer hasta el %1$s</string>
+    <string name="nueva_placeholder">¿Qué querés hacer o recordar?</string>
+    <string name="nueva_pregunta_fecha">¿Tiene fecha límite?</string>
+    <string name="nueva_sin_fecha">Sin fecha</string>
+    <string name="nueva_con_fecha">Con fecha</string>
+    <string name="nueva_fecha_limite">Fecha límite</string>
+    <string name="nueva_guardar">Guardar tarea</string>
+    <string name="nueva_aviso_con_fecha">El pájaro dormirá en el Nido y despertará cuando se acerque la fecha límite.</string>
+    <string name="nueva_aviso_sin_fecha">El pájaro dormirá en el Nido y despertará si pasan %1$d días sin avance.</string>
+
+    <string name="onb_bienvenida">BIENVENIDO A PIOTASK</string>
+    <string name="onb_titulo">Guardá todo. Mirá solo lo que importa hoy.</string>
+    <string name="onb_dormido">Dormido</string>
+    <string name="onb_dormido_desc">Guardada en el Nido. No te molesta.</string>
+    <string name="onb_despierto">Despierto</string>
+    <string name="onb_despierto_desc">Se acerca la fecha o hace tiempo que no la tocás.</string>
+    <string name="onb_reclamando">Reclamando</string>
+    <string name="onb_reclamando_desc">Vence ya o quedó muy abandonada.</string>
+    <string name="onb_crear_tarea">Crear mi primera tarea</string>
+    <string name="onb_configurar">Configurar categorías primero</string>
+
+    <string name="ajustes_titulo">Ajustes</string>
+    <string name="ajustes_categorias">CATEGORÍAS</string>
+    <plurals name="ajustes_tareas">
+        <item quantity="one">%1$d tarea</item>
+        <item quantity="other">%1$d tareas</item>
+    </plurals>
+    <string name="ajustes_nueva_categoria">+ Nueva categoría</string>
+    <string name="ajustes_editar_categoria">Editar categoría</string>
+    <string name="ajustes_nombre">Nombre</string>
+    <string name="ajustes_color">Color</string>
+    <string name="ajustes_cuando_despiertan">CUÁNDO DESPIERTAN</string>
+    <string name="ajustes_ventana_deadline">Despierta antes del vencimiento</string>
+    <string name="ajustes_ventana_inactividad">Reclama tras días sin avance</string>
+    <string name="ajustes_visibles">Tareas visibles en Rama y widget</string>
+    <string name="ajustes_dias">%1$d días</string>
+    <string name="ajustes_nota_umbrales">Los pájaros despiertan al 40 % de la ventana de inactividad y reclaman al 30 % de la ventana de deadline. Esos porcentajes no se configuran.</string>
+    <string name="ajustes_eliminar_titulo">Eliminar categoría</string>
+    <string name="ajustes_eliminar_vacia">Se elimina la categoría %1$s.</string>
+    <string name="ajustes_eliminar_reasignar">%1$s tiene tareas. Elegí a qué categoría pasarlas antes de eliminarla.</string>
+    <string name="ajustes_categoria_en_uso">En uso: no se puede eliminar hasta reasignar las tareas.</string>
 </resources>

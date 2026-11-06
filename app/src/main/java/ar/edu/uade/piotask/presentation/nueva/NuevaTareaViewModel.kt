@@ -6,11 +6,11 @@ import androidx.lifecycle.viewModelScope
 import ar.edu.uade.piotask.core.model.Resource
 import ar.edu.uade.piotask.core.navigation.Rutas
 import ar.edu.uade.piotask.domain.model.Categoria
+import ar.edu.uade.piotask.domain.model.Criterios
 import ar.edu.uade.piotask.domain.model.Tarea
 import ar.edu.uade.piotask.domain.repository.CategoriaRepository
 import ar.edu.uade.piotask.domain.repository.PreferenciasRepository
 import ar.edu.uade.piotask.domain.repository.TareaRepository
-import ar.edu.uade.piotask.domain.usecase.CrearCategoriasSugeridasUseCase
 import ar.edu.uade.piotask.domain.usecase.EliminarTareaUseCase
 import ar.edu.uade.piotask.domain.usecase.GuardarTareaUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -19,7 +19,6 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
@@ -39,7 +38,6 @@ class NuevaTareaViewModel @Inject constructor(
     private val tareaRepository: TareaRepository,
     private val categoriaRepository: CategoriaRepository,
     preferenciasRepository: PreferenciasRepository,
-    private val crearCategoriasSugeridas: CrearCategoriasSugeridasUseCase,
     private val guardarTarea: GuardarTareaUseCase,
     private val eliminarTarea: EliminarTareaUseCase,
 ) : ViewModel() {
@@ -54,6 +52,10 @@ class NuevaTareaViewModel @Inject constructor(
     val categorias: StateFlow<List<Categoria>> = categoriaRepository.observarTodas()
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
 
+    /** Para explicar cuándo va a despertar la tarea según los criterios vigentes. */
+    val criterios: StateFlow<Criterios> = preferenciasRepository.observarCriterios()
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), Criterios())
+
     val ultimaCategoriaId: StateFlow<Long?> = preferenciasRepository.observarUltimaCategoriaId()
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
 
@@ -62,10 +64,6 @@ class NuevaTareaViewModel @Inject constructor(
 
     init {
         tareaId?.let { id -> viewModelScope.launch { original.value = tareaRepository.obtenerPorId(id) } }
-        // Hasta que exista el onboarding, la primera vez se crean Trabajo, Estudio y Arte.
-        viewModelScope.launch {
-            if (categoriaRepository.observarTodas().first().isEmpty()) crearCategoriasSugeridas()
-        }
     }
 
     fun guardar(titulo: String, categoriaId: Long, deadline: LocalDate?) {

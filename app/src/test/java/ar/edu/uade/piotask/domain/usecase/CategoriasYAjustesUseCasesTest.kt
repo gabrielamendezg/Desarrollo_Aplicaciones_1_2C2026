@@ -16,7 +16,7 @@ class CategoriasYAjustesUseCasesTest {
 
     private val tareas = FakeTareaRepository()
     private val categorias = FakeCategoriaRepository(
-        inicial = listOf(Categoria(1, "Trabajo", "#1D4ED8"), Categoria(2, "Estudio", "#DC2626")),
+        inicial = listOf(Categoria(1, "Trabajo", "#2F5FA8"), Categoria(2, "Estudio", "#B3392F")),
         tareas = tareas,
     )
     private val prefs = FakePreferenciasRepository()

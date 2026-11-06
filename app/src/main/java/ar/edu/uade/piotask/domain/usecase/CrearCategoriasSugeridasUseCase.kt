@@ -17,9 +17,9 @@ class CrearCategoriasSugeridasUseCase @Inject constructor(
 
     companion object {
         val SUGERIDAS = listOf(
-            Categoria(nombre = "Trabajo", colorHex = "#1D4ED8"),
-            Categoria(nombre = "Estudio", colorHex = "#DC2626"),
-            Categoria(nombre = "Arte", colorHex = "#DB2777"),
+            Categoria(nombre = "Trabajo", colorHex = "#2F5FA8"),
+            Categoria(nombre = "Estudio", colorHex = "#B3392F"),
+            Categoria(nombre = "Arte", colorHex = "#B0407A"),
         )
     }
 }
