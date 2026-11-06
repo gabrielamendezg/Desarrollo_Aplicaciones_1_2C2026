@@ -1,0 +1,214 @@
+{
+  "formatVersion": 1,
+  "database": {
+    "version": 1,
+    "identityHash": "06fb3a91411aebc6e2b136af56708c73",
+    "entities": [
+      {
+        "tableName": "categorias",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `nombre` TEXT NOT NULL, `colorHex` TEXT NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "nombre",
+            "columnName": "nombre",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "colorHex",
+            "columnName": "colorHex",
+            "affinity": "TEXT",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        }
+      },
+      {
+        "tableName": "tareas",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `titulo` TEXT NOT NULL, `categoriaId` INTEGER NOT NULL, `progreso` INTEGER NOT NULL, `deadline` INTEGER, `pospuestaHasta` INTEGER, `ventanaDeadlineDias` INTEGER, `ventanaInactividadDias` INTEGER, `creadaEn` INTEGER NOT NULL, `ultimaActividad` INTEGER NOT NULL, `completadaEn` INTEGER, FOREIGN KEY(`categoriaId`) REFERENCES `categorias`(`id`) ON UPDATE NO ACTION ON DELETE RESTRICT )",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "titulo",
+            "columnName": "titulo",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "categoriaId",
+            "columnName": "categoriaId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "progreso",
+            "columnName": "progreso",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "deadline",
+            "columnName": "deadline",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "pospuestaHasta",
+            "columnName": "pospuestaHasta",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "ventanaDeadlineDias",
+            "columnName": "ventanaDeadlineDias",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "ventanaInactividadDias",
+            "columnName": "ventanaInactividadDias",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "creadaEn",
+            "columnName": "creadaEn",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "ultimaActividad",
+            "columnName": "ultimaActividad",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "completadaEn",
+            "columnName": "completadaEn",
+            "affinity": "INTEGER"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_tareas_categoriaId",
+            "unique": false,
+            "columnNames": [
+              "categoriaId"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_tareas_categoriaId` ON `${TABLE_NAME}` (`categoriaId`)"
+          },
+          {
+            "name": "index_tareas_completadaEn",
+            "unique": false,
+            "columnNames": [
+              "completadaEn"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_tareas_completadaEn` ON `${TABLE_NAME}` (`completadaEn`)"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "table": "categorias",
+            "onDelete": "RESTRICT",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "categoriaId"
+            ],
+            "referencedColumns": [
+              "id"
+            ]
+          }
+        ]
+      },
+      {
+        "tableName": "actividades",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `tareaId` INTEGER NOT NULL, `fecha` INTEGER NOT NULL, `tipo` TEXT NOT NULL, `progreso` INTEGER, FOREIGN KEY(`tareaId`) REFERENCES `tareas`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "tareaId",
+            "columnName": "tareaId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "fecha",
+            "columnName": "fecha",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "tipo",
+            "columnName": "tipo",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "progreso",
+            "columnName": "progreso",
+            "affinity": "INTEGER"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_actividades_tareaId",
+            "unique": false,
+            "columnNames": [
+              "tareaId"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_actividades_tareaId` ON `${TABLE_NAME}` (`tareaId`)"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "table": "tareas",
+            "onDelete": "CASCADE",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "tareaId"
+            ],
+            "referencedColumns": [
+              "id"
+            ]
+          }
+        ]
+      }
+    ],
+    "setupQueries": [
+      "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '06fb3a91411aebc6e2b136af56708c73')"
+    ]
+  }
+}

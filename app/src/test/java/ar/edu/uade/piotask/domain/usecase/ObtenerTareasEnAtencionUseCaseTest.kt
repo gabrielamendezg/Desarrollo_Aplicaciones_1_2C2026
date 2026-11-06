@@ -6,11 +6,9 @@ import ar.edu.uade.piotask.domain.model.Criterios
 import ar.edu.uade.piotask.domain.model.Tarea
 import ar.edu.uade.piotask.domain.model.TareaEvaluada
 import ar.edu.uade.piotask.domain.model.TareasEnAtencion
-import ar.edu.uade.piotask.domain.repository.PreferenciasRepository
-import ar.edu.uade.piotask.domain.repository.TareaRepository
+import ar.edu.uade.piotask.domain.FakePreferenciasRepository
+import ar.edu.uade.piotask.domain.FakeTareaRepository
 import ar.edu.uade.piotask.domain.tarea
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
@@ -23,15 +21,10 @@ import kotlin.random.Random
 
 class ObtenerTareasEnAtencionUseCaseTest {
 
-    private val tareas = MutableStateFlow<List<Tarea>>(emptyList())
-    private val criterios = MutableStateFlow(Criterios())
-
-    private val tareaRepository = object : TareaRepository {
-        override fun observarActivas(): Flow<List<Tarea>> = tareas
-    }
-    private val preferenciasRepository = object : PreferenciasRepository {
-        override fun observarCriterios(): Flow<Criterios> = criterios
-    }
+    private val tareaRepository = FakeTareaRepository()
+    private val preferenciasRepository = FakePreferenciasRepository()
+    private val tareas get() = tareaRepository.tareas
+    private val criterios get() = preferenciasRepository.criterios
 
     private suspend fun obtener(hoy: LocalDate = HOY): TareasEnAtencion =
         ObtenerTareasEnAtencionUseCase(

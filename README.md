@@ -36,13 +36,14 @@ Las dependencias apuntan hacia `domain`, que no conoce Android. CI falla si esa 
 
 ## Estado del proyecto
 
-La app todavía no tiene pantallas de usuario ni guarda datos: hoy muestra solo una pantalla inicial.
+La app ya guarda datos en el dispositivo, pero todavía no tiene pantallas de usuario: hoy muestra solo una pantalla inicial.
 
 | Área | Estado |
 |---|---|
 | Base del proyecto, Hilt y CI | Hecho |
 | Reglas de atención, puntaje y top N (`domain/`) | Hecho, con tests; fórmula pendiente de aprobación |
-| Persistencia con Room y DataStore (`data/`) | Pendiente |
+| Casos de uso de escritura y repositorios (`domain/`) | Hecho, con tests |
+| Persistencia con Room y DataStore (`data/`) | Hecho; faltan tests instrumentados de Room |
 | Pantallas Compose (`presentation/`) | Pendiente |
 | Widget y reevaluación diaria | Pendiente |
 | Validación con usuarios y caso de negocio | Pendiente |
