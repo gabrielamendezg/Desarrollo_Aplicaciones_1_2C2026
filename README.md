@@ -36,7 +36,7 @@ Las dependencias apuntan hacia `domain`, que no conoce Android. CI falla si esa 
 
 ## Estado del proyecto
 
-La app ya guarda datos en el dispositivo, pero todavía no tiene pantallas de usuario: hoy muestra solo una pantalla inicial.
+La app ya funciona de punta a punta para crear tareas, verlas en la Rama o el Nido, registrar avance y completar con deshacer. Faltan Detalle, Posponer, Onboarding, Ajustes, el widget y la reevaluación diaria.
 
 | Área | Estado |
 |---|---|
@@ -44,7 +44,7 @@ La app ya guarda datos en el dispositivo, pero todavía no tiene pantallas de us
 | Reglas de atención, puntaje y top N (`domain/`) | Hecho, con tests; fórmula pendiente de aprobación |
 | Casos de uso de escritura y repositorios (`domain/`) | Hecho, con tests |
 | Persistencia con Room y DataStore (`data/`) | Hecho; faltan tests instrumentados de Room |
-| Pantallas Compose (`presentation/`) | Pendiente |
+| Pantallas Compose: Rama, Nido y Nueva tarea (`presentation/`) | Hecho; faltan Detalle, Onboarding y Ajustes |
 | Widget y reevaluación diaria | Pendiente |
 | Validación con usuarios y caso de negocio | Pendiente |
 

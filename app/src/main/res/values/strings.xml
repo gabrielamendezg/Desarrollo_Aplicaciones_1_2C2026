@@ -1,3 +1,61 @@
 <resources>
     <string name="app_name">PioTask</string>
+
+    <string name="nav_rama">Rama</string>
+    <string name="nav_nido">Nido</string>
+    <string name="nav_ajustes">Ajustes</string>
+
+    <string name="estado_dormido">DORMIDO</string>
+    <string name="estado_despierto">DESPIERTO</string>
+    <string name="estado_reclamando">RECLAMANDO</string>
+    <string name="estado_completada">COMPLETADA</string>
+
+    <string name="motivo_vence_hoy">vence hoy</string>
+    <string name="motivo_vence_manana">vence mañana</string>
+    <string name="motivo_vence_en">vence en %1$d días</string>
+    <plurals name="motivo_vencida">
+        <item quantity="one">venció hace %1$d día</item>
+        <item quantity="other">venció hace %1$d días</item>
+    </plurals>
+    <plurals name="motivo_sin_avance">
+        <item quantity="one">%1$d día sin avance</item>
+        <item quantity="other">%1$d días sin avance</item>
+    </plurals>
+    <string name="motivo_pospuesta">pospuesta hasta el %1$s</string>
+
+    <string name="rama_resumen">%1$d despiertos · %2$d descansan en el Nido</string>
+    <string name="rama_todo_tranquilo">Todo tranquilo. Tus %1$d tareas descansan en el Nido.</string>
+    <string name="rama_vacio">Todavía no hay nada acá. Tocá + para crear tu primera tarea.</string>
+    <string name="rama_mas_tareas">+%1$d tareas más requieren atención</string>
+    <string name="rama_ver_menos">Ver menos</string>
+    <string name="rama_error">No pudimos leer tus tareas.</string>
+    <string name="reintentar">Reintentar</string>
+    <string name="filtro_todas">Todas</string>
+    <string name="cd_nueva_tarea">Nueva tarea</string>
+
+    <string name="accion_avance">Avancé</string>
+    <string name="accion_completar">Completar</string>
+    <string name="snack_completada">Tarea completada</string>
+    <string name="deshacer">Deshacer</string>
+
+    <string name="hoja_avance_titulo">Registrar avance</string>
+    <string name="hoja_guardar">Guardar</string>
+    <string name="atajo_mas">+%1$d %%</string>
+    <string name="atajo_igual" formatted="false">Trabajé, mismo %</string>
+    <string name="progreso_valor">%1$d %%</string>
+
+    <string name="nido_vacio">Todavía no hay nada acá</string>
+    <string name="nido_todo_despierto">Todas tus tareas están despiertas en la Rama.</string>
+    <string name="sin_categoria">Sin categoría</string>
+
+    <string name="nueva_titulo">Nueva tarea</string>
+    <string name="nueva_campo_titulo">Título</string>
+    <string name="nueva_campo_categoria">Categoría</string>
+    <string name="nueva_tiene_fecha">Tiene fecha límite</string>
+    <string name="nueva_elegir_fecha">Elegir fecha</string>
+    <string name="aceptar">Aceptar</string>
+    <string name="guardar">Guardar</string>
+    <string name="cancelar">Cancelar</string>
+
+    <string name="ajustes_proximamente">Los ajustes y las categorías llegan en el próximo paso.</string>
 </resources>
