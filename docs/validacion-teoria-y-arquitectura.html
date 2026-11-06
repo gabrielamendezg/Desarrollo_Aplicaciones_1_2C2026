@@ -1,0 +1,214 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>PioTask — Validación de teoría y arquitectura</title>
+<style>
+  @page { size: A4; margin: 18mm 16mm 18mm 16mm; }
+  * { box-sizing: border-box; }
+  body { font-family: -apple-system, "Helvetica Neue", Helvetica, Arial, sans-serif; font-size: 10.5pt; line-height: 1.45; color: #1f1f1c; }
+  h1 { font-size: 22pt; margin: 0 0 4pt; }
+  h2 { font-size: 14pt; margin: 22pt 0 6pt; padding-bottom: 3pt; border-bottom: 1.5px solid #1f1f1c; page-break-after: avoid; }
+  h3 { font-size: 11.5pt; margin: 14pt 0 4pt; page-break-after: avoid; }
+  p { margin: 5pt 0; }
+  .sub { color: #5f5e58; margin-bottom: 10pt; }
+  .meta { font-size: 9pt; color: #5f5e58; }
+  table { width: 100%; border-collapse: collapse; margin: 8pt 0; font-size: 9.2pt; page-break-inside: auto; }
+  tr { page-break-inside: avoid; }
+  th { background: #efe9dc; text-align: left; padding: 5pt 6pt; border: 1px solid #c9c7be; }
+  td { padding: 4.5pt 6pt; border: 1px solid #c9c7be; vertical-align: top; }
+  code, pre { font-family: "SF Mono", Menlo, Consolas, monospace; font-size: 8.6pt; }
+  code { background: #f1efe8; padding: 0 2pt; border-radius: 2px; }
+  pre { background: #f6f4ee; border: 1px solid #e0dccf; padding: 7pt 9pt; border-radius: 4px; white-space: pre-wrap; page-break-inside: avoid; }
+  .ok, .par, .no { display: inline-block; font-size: 8pt; font-weight: 700; padding: 1pt 6pt; border-radius: 8pt; white-space: nowrap; }
+  .ok { background: #dff0d2; color: #2d5a12; }
+  .par { background: #f7e6b8; color: #5e4400; }
+  .no { background: #f6dad6; color: #7a1f18; }
+  .capas { margin: 10pt 0; page-break-inside: avoid; }
+  .capa { border: 1.5px solid #1f1f1c; border-radius: 6px; padding: 7pt 10pt; margin: 0 0 14pt; position: relative; }
+  .capa b { display: block; font-size: 10.5pt; }
+  .capa span { font-size: 9pt; color: #5f5e58; }
+  .capa:not(:last-child)::after { content: "▼ la presentación depende del dominio"; position: absolute; left: 50%; bottom: -13pt; transform: translateX(-50%); font-size: 7.5pt; color: #5f5e58; background: #fff; padding: 0 4pt; white-space: nowrap; }
+  .capa.sube:not(:last-child)::after { content: "▲ la capa de datos depende del dominio: implementa sus interfaces"; }
+  table.corta { page-break-inside: avoid; }
+  .p { background: #e6eefa; } .d { background: #e3f1da; } .a { background: #f7ecd0; }
+  .callout { border-left: 4px solid #b3392f; background: #fbeeec; padding: 6pt 10pt; margin: 8pt 0; page-break-inside: avoid; }
+  .nota { border-left: 4px solid #2f5fa8; background: #eef3fb; padding: 6pt 10pt; margin: 8pt 0; page-break-inside: avoid; }
+  ol, ul { margin: 4pt 0 4pt 16pt; padding: 0; }
+  li { margin: 2pt 0; }
+  .portada { margin-bottom: 14pt; }
+  .num { text-align: right; white-space: nowrap; }
+</style>
+</head>
+<body>
+
+<div class="portada">
+  <h1>PioTask — Validación de teoría y arquitectura</h1>
+  <p class="sub">Desarrollo de Aplicaciones I · UADE · Estado del código en <code>develop</code></p>
+  <p class="meta">Documento para que el grupo revise si lo implementado coincide con la preentrega (secciones 7 a 17) y con la teoría de la materia. Cada afirmación remite a una clase o a un test que se puede abrir. Al final hay una lista de puntos que hay que decidir o corregir.</p>
+</div>
+
+<h2>1. Resumen</h2>
+<table>
+  <tr><th style="width:34%">Dato</th><th>Valor</th></tr>
+  <tr><td>Qué es</td><td>App Android que guarda todas las tareas y muestra solo las que necesitan atención: la Rama (despiertas) y el Nido (dormidas y pospuestas).</td></tr>
+  <tr><td>Stack</td><td>Kotlin, Jetpack Compose (Material 3), Navigation Compose, ViewModel y StateFlow, Room, DataStore, Hilt. minSdk 26, compileSdk 37.</td></tr>
+  <tr><td>Tamaño</td><td>70 archivos Kotlin en <code>main</code> (≈4250 líneas) y 746 líneas de tests.</td></tr>
+  <tr><td>Tests</td><td>48 tests unitarios, 0 fallas. Ninguno de Room, de ViewModels ni de UI.</td></tr>
+  <tr><td>Permisos</td><td>Ninguno: el manifiesto no declara <code>uses-permission</code> (sin red, sin notificaciones).</td></tr>
+  <tr><td>Hecho</td><td>Dominio, datos, onboarding, Rama, Nido, Detalle, Nueva/Editar tarea, Ajustes, hojas de avance y posponer, deshacer.</td></tr>
+  <tr><td>Pendiente</td><td>Widget con Glance, reevaluación diaria con WorkManager, tests de Room y de UI, validación con usuarios, caso de negocio.</td></tr>
+</table>
+
+<h2>2. Teoría aplicada</h2>
+<table>
+  <tr><th style="width:22%">Concepto</th><th style="width:38%">Qué dice</th><th>Dónde está en PioTask</th></tr>
+  <tr><td>Clean Architecture: regla de dependencia</td><td>Las dependencias de código apuntan hacia adentro. El dominio no conoce frameworks.</td><td><code>domain/</code> es Kotlin puro. El workflow de CI falla si algún archivo de esa carpeta importa <code>android</code> o <code>androidx</code> (<code>.github/workflows/ci.yml</code>).</td></tr>
+  <tr><td>Inversión de dependencias (la D de SOLID)</td><td>Lo de alto nivel define la interfaz; lo de bajo nivel la implementa.</td><td>Las interfaces <code>TareaRepository</code>, <code>CategoriaRepository</code>, <code>ActividadRepository</code> y <code>PreferenciasRepository</code> están en <code>domain/repository</code>. Las implementaciones están en <code>data/repository</code> y se enlazan con <code>@Binds</code> en <code>di/RepositoryModule</code>.</td></tr>
+  <tr><td>Responsabilidad única (la S)</td><td>Una clase, una razón para cambiar.</td><td>Un caso de uso por acción del usuario: <code>RegistrarAvanceUseCase</code>, <code>PosponerTareaUseCase</code>, <code>CompletarTareaUseCase</code>, etc. (14 casos de uso).</td></tr>
+  <tr><td>Segregación de interfaces (la I)</td><td>Nadie depende de lo que no usa.</td><td><code>ActividadRepository</code> es de solo lectura; las escrituras de actividad van por <code>TareaRepository</code>.</td></tr>
+  <tr><td>MVVM y flujo unidireccional</td><td>La vista dibuja un estado y emite eventos; el ViewModel lo produce.</td><td>Cada pantalla tiene su ViewModel con <code>StateFlow&lt;UiState&gt;</code> (<code>RamaViewModel</code>, <code>NidoViewModel</code>, <code>DetalleViewModel</code>). Las pantallas Compose no tienen reglas de negocio.</td></tr>
+  <tr><td>Fuente única de verdad (offline-first)</td><td>Un solo lugar es dueño de los datos; la UI lo observa.</td><td>Room expone <code>Flow</code> (<code>TareaDao.observarActivas</code>); cualquier cambio vuelve a calcular la Rama sin que la pantalla lo pida.</td></tr>
+  <tr><td>Estado derivado, no persistido</td><td>Lo que se puede calcular no se guarda, para no desincronizarse.</td><td>El estado Dormido/Despierto/Reclamando no tiene columna: <code>CalcularEstadoAtencionUseCase</code> lo deriva de deadline, última actividad, posposición y fecha actual.</td></tr>
+  <tr><td>Tecnología calma (Weiser y Brown)</td><td>La información pasa de la periferia al centro solo cuando hace falta.</td><td>El Nido es la periferia y la Rama el centro. No hay notificaciones: el aviso es el widget (pendiente de implementar).</td></tr>
+  <tr><td>Atomicidad</td><td>Un cambio compuesto se aplica entero o no se aplica.</td><td><code>TareaRepositoryImpl.guardarConActividad</code> y <code>revertir</code> usan <code>database.withTransaction</code>.</td></tr>
+  <tr><td>Determinismo y testeabilidad</td><td>El tiempo y los datos externos se inyectan.</td><td>El <code>Clock</code> se inyecta (<code>di/TiempoModule</code>); los tests usan un reloj fijo y repositorios en memoria (<code>Fakes.kt</code>) en lugar de mocks.</td></tr>
+  <tr><td>Manejo explícito de errores</td><td>Los fallos esperables son valores, no excepciones sueltas.</td><td>Los casos de uso de escritura devuelven <code>Resource&lt;T&gt;</code> con un mensaje apto para la UI (<code>domain/usecase/Resultado.kt</code>).</td></tr>
+</table>
+
+<h2>3. Arquitectura</h2>
+<div class="capas">
+  <div class="capa p"><b>Presentación · <code>presentation/</code></b><span>Pantallas Compose, ViewModels, componentes comunes (pájaros, hojas, botones). Observa <code>StateFlow</code>; envía eventos a los casos de uso.</span></div>
+  <div class="capa d sube"><b>Dominio · <code>domain/</code> (Kotlin puro)</b><span>Modelos (<code>Tarea</code>, <code>Categoria</code>, <code>Criterios</code>, <code>Actividad</code>, <code>EstadoAtencion</code>), 14 casos de uso e interfaces de repositorio.</span></div>
+  <div class="capa a"><b>Datos · <code>data/</code></b><span>Entidades y DAOs de Room, DataStore, mappers entidad↔modelo e implementación de los repositorios.</span></div>
+</div>
+<p>Transversales: <code>core/</code> (<code>Resource</code>, <code>UiState</code>, tema, rutas) y <code>di/</code> (módulos de Hilt: base de datos, DataStore, repositorios, reloj). El dominio no depende de ninguna de las otras dos capas. Es un único módulo Gradle (<code>:app</code>); las capas se separan por paquete y la regla se hace cumplir con CI.</p>
+
+<h3>3.1 Flujo de datos: registrar un avance</h3>
+<p>Es el flujo del diagrama 17.3 de la preentrega, con las clases reales:</p>
+<ol>
+  <li><code>HojaAvance</code> (Compose) → el usuario guarda 60 % → <code>DetalleViewModel.registrarAvance(60)</code>.</li>
+  <li><code>RegistrarAvanceUseCase</code> valida 0..100, busca la tarea (<code>tareaPendiente</code>: debe existir y no estar completada) y arma la tarea nueva con <code>progreso</code> y <code>ultimaActividad = ahora</code>.</li>
+  <li><code>TareaRepository.guardarConActividad(tarea, actividad AVANCE)</code> → <code>TareaRepositoryImpl</code> abre una transacción: <code>UPDATE tarea</code> + <code>INSERT actividad</code>.</li>
+  <li>Room invalida la tabla y <code>TareaDao.observarActivas()</code> emite la lista nueva.</li>
+  <li><code>ObtenerTareasEnAtencionUseCase</code> combina tareas y criterios, calcula estado y puntaje de cada una y reparte Rama / "+N" / Nido.</li>
+  <li><code>RamaViewModel.uiState</code> emite; <code>RamaScreen</code> se recompone: el pájaro se duerme o cambia el motivo.</li>
+  <li>El caso de uso devuelve un <code>AccionDeshacible</code>; si el usuario toca "Deshacer", <code>DeshacerAccionUseCase</code> restaura la tarea anterior y borra la actividad, también en una transacción.</li>
+</ol>
+<div class="nota"><b>Diferencia con el diagrama 17.3:</b> el último paso del diagrama ("pedir actualización del widget") todavía no existe, porque el widget está pendiente.</div>
+
+<h3>3.2 Modelo de datos (Room, base <code>pio.db</code>, versión 1)</h3>
+<table>
+  <tr><th style="width:22%">Tabla</th><th>Columnas</th><th style="width:28%">Relación</th></tr>
+  <tr><td><code>categorias</code></td><td>id, nombre, colorHex</td><td>1 categoría → N tareas. Borrado <b>RESTRICT</b>: no se puede eliminar con tareas.</td></tr>
+  <tr><td><code>tareas</code></td><td>id, titulo, categoriaId, progreso (0–100), deadline, pospuestaHasta, ventanaDeadlineDias, ventanaInactividadDias, creadaEn, ultimaActividad, completadaEn</td><td>N → 1 categoría. Índices en categoriaId y completadaEn.</td></tr>
+  <tr><td><code>actividades</code></td><td>id, tareaId, fecha, tipo (AVANCE / POSPUESTA / COMPLETADA), progreso</td><td>N → 1 tarea. Borrado <b>CASCADE</b>.</td></tr>
+</table>
+<p>Fechas: <code>Instant</code> como milisegundos y <code>LocalDate</code> como día de época (<code>Converters</code>), para poder comparar en SQL. Preferencias en DataStore: criterios globales (ventana de deadline, ventana de inactividad, límite visible), onboarding visto y última categoría usada.</p>
+
+<h2>4. Reglas de atención</h2>
+<p>Fuente: <code>docs/reglas-atencion.md</code>. Deadline e inactividad son dos relojes independientes; el estado final es el mayor de los dos.</p>
+<table class="corta">
+  <tr><th>Reloj</th><th>Dormido</th><th>Despierto</th><th>Reclamando</th></tr>
+  <tr><td>Deadline (ventana 7)</td><td>Sin deadline, o faltan más de 7 días</td><td>Faltan de 7 a 3 días</td><td>Faltan 2 días o menos, o está vencida</td></tr>
+  <tr><td>Inactividad (ventana 30)</td><td>Menos de 12 días sin avance</td><td>De 12 a 29 días</td><td>30 días o más</td></tr>
+</table>
+<p><b>Parámetros internos:</b> <code>diaReclamo = 30 % de la ventana de deadline</code> (redondeado hacia abajo: 7 → 2) y <code>diaDespierto = 40 % de la ventana de inactividad</code> (redondeado hacia arriba: 30 → 12). Redondear hacia arriba evita que una ventana de 1 día deje todo siempre despierto.</p>
+<h3>Puntaje (ordena dentro de un mismo estado)</h3>
+<pre>Pd = presión de deadline   = 0 si no hay deadline; si hay, (ventana − días restantes) / ventana, limitado a 0..1
+Pi = presión de inactividad = días sin avance / ventana de inactividad, limitado a 0..1
+Tr = trabajo restante       = (100 − progreso) / 100
+
+puntaje = 100 × (0,6 × Pd × (0,5 + 0,5 × Tr) + 0,4 × Pi)</pre>
+<p>El trabajo restante solo cambia el orden dentro de un estado, nunca el estado. Ejemplo documentado y probado: una tarea que vence en 2 días y lleva 5 sin avance da <b>45</b> puntos con 20 % de progreso y <b>30</b> con 90 %.</p>
+<h3>Orden y límite</h3>
+<ol>
+  <li>Estado: Reclamando antes que Despierto.</li>
+  <li>Puntaje, de mayor a menor.</li>
+  <li>Deadline más cercano; las tareas sin deadline van al final.</li>
+  <li>Id, para que el orden sea estable.</li>
+</ol>
+<p>La Rama muestra las primeras N y el resto se cuenta en "+N tareas más requieren atención". <b>Regla de seguridad:</b> una tarea Reclamando nunca queda en el Nido (hay un test que lo verifica).</p>
+<h3>Posposición</h3>
+<p>No es un cuarto estado, es una condición de visibilidad: hasta la fecha elegida la tarea está en el Nido con el pájaro dormido. Posponer no cuenta como avance (no toca <code>ultimaActividad</code>). Si por deadline la tarea entra en Reclamando durante la posposición, vuelve a la Rama; esto incluye posponer una tarea que ya está en ese estado.</p>
+
+<h2>5. Trazabilidad con la preentrega</h2>
+<h3>5.1 Requisitos funcionales</h3>
+<table class="corta">
+  <tr><th style="width:9%">Req.</th><th style="width:15%">Estado</th><th>Qué hay y qué falta</th></tr>
+  <tr><td>RF01</td><td><span class="par">Parcial</span></td><td>Título, categoría y fecha límite; la tarea nace con <code>ultimaActividad = creación</code> y su estado se calcula (<code>GuardarTareaUseCase</code>, con tests). <b>Falta</b> el bloque "Más opciones" (progreso inicial, "Posponer hasta", ventanas por tarea): el modelo y el caso de uso ya aceptan esos campos, pero la pantalla no los pide.</td></tr>
+  <tr><td>RF02</td><td><span class="par">Parcial</span></td><td>Estado, puntaje, orden, límite N, "+N" y motivo en cada tarjeta (<code>ObtenerTareasEnAtencionUseCase</code>, 9 tests). Se recalcula al abrir la app y tras cada acción porque la Rama observa los datos. <b>Falta</b> la reevaluación una vez al día en segundo plano (WorkManager).</td></tr>
+  <tr><td>RF03</td><td><span class="ok">Cumple</span></td><td>Registrar avance (hoja con atajos +10 %, +25 % y "mismo %"), Posponer (mañana, 3 días, 1 semana, fecha exacta) y Completar, desde la tarjeta y desde el Detalle. "Deshacer" de 5 s para completar y posponer. 11 tests de casos de uso.</td></tr>
+  <tr><td>RF04</td><td><span class="par">Parcial</span></td><td>Límite visible 3/5/7, ventana de deadline y de inactividad globales, categorías con nombre y color (crear, editar, eliminar con reasignación). Al guardar, la Rama se recalcula sola (test). <b>Falta</b> la ventana por tarea en la UI y la actualización del widget.</td></tr>
+</table>
+<h3>5.2 Requisitos no funcionales</h3>
+<table>
+  <tr><th style="width:9%">Req.</th><th style="width:15%">Estado</th><th>Evidencia o brecha</th></tr>
+  <tr><td>RNF01 Offline</td><td><span class="ok">Cumple</span></td><td>Sin permisos de red; todo pasa por Room y DataStore.</td></tr>
+  <tr><td>RNF02 Alta en ≤3 interacciones</td><td><span class="ok">Cumple</span></td><td>"+", escribir el título, "Guardar tarea". La última categoría usada queda preseleccionada.</td></tr>
+  <tr><td>RNF03 Rama &lt;1 s con 200 tareas</td><td><span class="no">Sin medir</span></td><td>No hay medición. Hay que cargar 200 tareas y medir.</td></tr>
+  <tr><td>RNF04 Accesibilidad de estado</td><td><span class="par">Parcial</span></td><td>Cumple: forma distinta por estado y descripción para TalkBack en cada pájaro; la categoría siempre lleva nombre además del color. <b>Falta</b> la etiqueta de texto (DORMIDO / DESPIERTO / RECLAMANDO) en las tarjetas de Rama y Nido; hoy aparece solo en el Detalle y el onboarding. Los wireframes tampoco la muestran en la tarjeta.</td></tr>
+  <tr><td>RNF05 Áreas táctiles ≥48 dp</td><td><span class="par">Parcial</span></td><td>Los botones "Avancé" y "Completar" de la tarjeta miden 44 dp, que es lo que dibuja el Figma, pero la preentrega pide 48 dp. Tampoco llegan a 48 dp los chips de filtro (36 dp), los atajos de la hoja de avance (40 dp), las opciones de categoría del formulario (44 dp) y los selectores de Ajustes (40 dp). Los botones principales (Guardar, Completar tarea, Posponer) miden 52 dp o más.</td></tr>
+  <tr><td>RNF06 Confiabilidad</td><td><span class="par">Parcial</span></td><td>Room con transacciones. No hay test que simule cierre o reinicio.</td></tr>
+  <tr><td>RNF07 Batería</td><td><span class="no">Pendiente</span></td><td>Depende de WorkManager, sin implementar. No hay procesos periódicos en la app.</td></tr>
+  <tr><td>RNF08 Privacidad</td><td><span class="ok">Cumple</span></td><td>Manifiesto sin <code>uses-permission</code>; datos solo en el dispositivo.</td></tr>
+</table>
+
+<h2>6. Pruebas</h2>
+<table>
+  <tr><th>Archivo</th><th class="num">Tests</th><th>Qué verifica</th></tr>
+  <tr><td><code>CalcularEstadoAtencionUseCaseTest</code></td><td class="num">13</td><td>Límites de cada estado por deadline e inactividad, el mayor de los dos relojes, ventana por tarea, posposición y su excepción.</td></tr>
+  <tr><td><code>CalcularPuntajeAtencionUseCaseTest</code></td><td class="num">5</td><td>Fórmula documentada, peso del trabajo restante, tope en 100.</td></tr>
+  <tr><td><code>ObtenerTareasEnAtencionUseCaseTest</code></td><td class="num">9</td><td>Reparto Rama / "+N" / Nido, orden, desempate, límite, cambio de fecha y de criterios, ninguna tarea Reclamando oculta.</td></tr>
+  <tr><td><code>AccionesSobreTareaUseCasesTest</code></td><td class="num">11</td><td>Guardar, avance, posponer, completar y deshacer; validaciones; posponer no cuenta como avance.</td></tr>
+  <tr><td><code>CategoriasYAjustesUseCasesTest</code></td><td class="num">7</td><td>Validación de categorías, borrado con reasignación, categorías sugeridas, criterios (3/5/7), onboarding.</td></tr>
+  <tr><td><code>MappersTest</code></td><td class="num">3</td><td>Ida y vuelta entidad↔modelo y conversores de fechas.</td></tr>
+  <tr><td><b>Total</b></td><td class="num"><b>48</b></td><td></td></tr>
+</table>
+<p><b>No cubierto:</b> consultas y transacciones de Room (requieren dispositivo), ViewModels, pantallas Compose y las hojas. Las pantallas se probaron a mano en un emulador Pixel 9a: alta con fecha, estado Reclamando, completar con deshacer, posponer, editar, eliminar, onboarding de primer uso y Ajustes.</p>
+
+<h2>7. Decisiones de diseño tomadas</h2>
+<table>
+  <tr><th style="width:30%">Decisión</th><th>Motivo</th></tr>
+  <tr><td>Cuatro repositorios en lugar de dos</td><td>La sección 12 nombra <code>TareaRepository</code> y <code>PreferenciasRepository</code>; las categorías y las actividades necesitan su propio acceso. <code>ActividadRepository</code> es de solo lectura para que la escritura quede en la misma transacción que la tarea.</td></tr>
+  <tr><td>Casos de uso que devuelven <code>Resource</code></td><td>La UI muestra el mensaje de error sin manejar excepciones.</td></tr>
+  <tr><td>Avisos con "Deshacer" en un bus global</td><td>Si el aviso viviera en cada pantalla se perdería al volver desde el Detalle.</td></tr>
+  <tr><td>El pájaro se elige por cercanía de color con las 3 categorías del diseño</td><td>Las categorías las define el usuario; no se puede mapear por nombre.</td></tr>
+  <tr><td>Un único módulo Gradle</td><td>El alcance no justifica varios; la regla de dependencias se hace cumplir en CI.</td></tr>
+  <tr><td>Tema solo claro</td><td>El Figma no define modo oscuro.</td></tr>
+  <tr><td>La Rama muestra "cargando" al volver, no el último estado</td><td>El flujo se detiene a los 5 s sin pantalla; mostrar el último valor enseñaba datos viejos.</td></tr>
+</table>
+
+<h2>8. Puntos a validar o corregir</h2>
+<div class="callout">
+  <b>Para decidir entre todos o con la cátedra</b>
+  <ol>
+    <li><b>Fórmula del puntaje.</b> Los pesos (0,6 deadline, 0,4 inactividad, base 0,5 del trabajo restante) siguen sin aprobación ni validación con usuarios; es la observación del profe.</li>
+    <li><b>12 o 14 días.</b> La sección 9 de la preentrega y el código usan 12 días (40 % de 30) para despertar por inactividad; la descripción del componente "Pájaro" en el Figma dice "14+ días". Hay que unificar.</li>
+    <li><b>Posponer una tarea que ya reclama.</b> Hoy no se puede ocultar; la hoja muestra un aviso genérico y no avisa de esta excepción, como pide <code>docs/reglas-atencion.md</code> y el aviso del frame 11 del Figma.</li>
+    <li><b>¿Llegar a 100 % completa la tarea?</b> Sigue abierto en <code>docs/reglas-atencion.md</code>.</li>
+    <li><b>Medianoche con la app abierta.</b> La Rama no recalcula hasta que cambian los datos o se vuelve a abrir. El widget con WorkManager lo resolverá para la pantalla de inicio, pero no dentro de la app.</li>
+  </ol>
+</div>
+<div class="callout">
+  <b>Brechas con la preentrega que conviene corregir</b>
+  <ol>
+    <li>Etiqueta de texto del estado en las tarjetas (RNF04).</li>
+    <li>Controles de 36 a 44 dp contra los 48 dp pedidos (RNF05); el Figma dibuja varios con esa medida, así que hay que decidir si se cambia el diseño o el requisito.</li>
+    <li>"Más opciones" de Nueva tarea y ventanas por tarea en RF01 y RF04.</li>
+    <li>Medir RNF03 con 200 tareas.</li>
+    <li>Tests de Room, de ViewModels y de las pantallas clave.</li>
+  </ol>
+</div>
+
+<h2>9. Pendiente</h2>
+<ol>
+  <li><b>Widget con Glance</b> (3 variantes del frame 12) que reutiliza <code>ObtenerTareasEnAtencionUseCase</code>.</li>
+  <li><b>Reevaluación diaria con WorkManager</b>, una vez por día, que actualiza el widget.</li>
+  <li>Validación con usuarios: ¿reduce el tiempo de organización y los olvidos frente a una lista convencional? ¿Los reaparecidos saturan?</li>
+  <li>Caso de negocio: diferencia suficiente para cambiar de app y cómo se sostendría el producto.</li>
+  <li>Prueba de cambios de fecha, posposiciones y actualización del widget, verificando que ninguna tarea importante quede oculta (entrega final).</li>
+</ol>
+
+</body>
+</html>
