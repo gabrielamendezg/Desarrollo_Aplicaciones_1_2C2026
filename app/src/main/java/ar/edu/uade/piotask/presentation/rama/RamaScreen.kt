@@ -15,33 +15,25 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Slider
-import androidx.compose.material3.SnackbarDuration
-import androidx.compose.material3.SnackbarHost
-import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -51,51 +43,26 @@ import ar.edu.uade.piotask.core.model.UiState
 import ar.edu.uade.piotask.domain.model.Tarea
 import ar.edu.uade.piotask.presentation.common.CategoriaConColor
 import ar.edu.uade.piotask.presentation.common.EtiquetaEstado
+import ar.edu.uade.piotask.presentation.common.HojaAvance
 import ar.edu.uade.piotask.presentation.common.texto
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
-import kotlin.math.roundToInt
-
-private const val DURACION_DESHACER_MS = 5_000L
 
 @Composable
 fun RamaScreen(
     onNuevaTarea: () -> Unit,
+    onAbrirDetalle: (Long) -> Unit,
     viewModel: RamaViewModel = hiltViewModel(),
 ) {
     val estado by viewModel.uiState.collectAsStateWithLifecycle()
-    val snackbar = remember { SnackbarHostState() }
-    val textoCompletada = stringResource(R.string.snack_completada)
-    val textoDeshacer = stringResource(R.string.deshacer)
     var tareaConAvance by remember { mutableStateOf<Tarea?>(null) }
-
-    LaunchedEffect(viewModel) {
-        viewModel.eventos.collect { evento ->
-            when (evento) {
-                is EventoRama.Error -> snackbar.showSnackbar(evento.mensaje)
-                is EventoRama.TareaCompletada -> {
-                    // El snackbar de Material dura 4 s como máximo con Short; el TPO pide 5 s.
-                    val cierre = launch {
-                        delay(DURACION_DESHACER_MS)
-                        snackbar.currentSnackbarData?.dismiss()
-                    }
-                    val respuesta = snackbar.showSnackbar(
-                        message = textoCompletada,
-                        actionLabel = textoDeshacer,
-                        duration = SnackbarDuration.Indefinite,
-                    )
-                    cierre.cancel()
-                    if (respuesta == SnackbarResult.ActionPerformed) viewModel.deshacer(evento.accion)
-                }
-            }
-        }
-    }
 
     Scaffold(
         contentWindowInsets = WindowInsets(0),
-        snackbarHost = { SnackbarHost(snackbar) },
         floatingActionButton = {
-            FloatingActionButton(onClick = onNuevaTarea) {
+            val descripcion = stringResource(R.string.cd_nueva_tarea)
+            FloatingActionButton(
+                onClick = onNuevaTarea,
+                modifier = Modifier.semantics { contentDescription = descripcion },
+            ) {
                 Text(text = "+", style = MaterialTheme.typography.headlineSmall)
             }
         },
@@ -119,6 +86,7 @@ fun RamaScreen(
                     onAlternar = viewModel::alternarExpandido,
                     onAvance = { tareaConAvance = it },
                     onCompletar = viewModel::completar,
+                    onAbrirDetalle = onAbrirDetalle,
                 )
             }
         }
@@ -150,6 +118,7 @@ private fun Contenido(
     onAlternar: () -> Unit,
     onAvance: (Tarea) -> Unit,
     onCompletar: (Long) -> Unit,
+    onAbrirDetalle: (Long) -> Unit,
 ) {
     LazyColumn(
         contentPadding = PaddingValues(16.dp),
@@ -192,7 +161,7 @@ private fun Contenido(
             }
         }
         items(ui.tarjetas, key = { it.evaluada.tarea.id }) { tarjeta ->
-            TarjetaTarea(tarjeta, onAvance = onAvance, onCompletar = onCompletar)
+            TarjetaTarea(tarjeta, onAvance = onAvance, onCompletar = onCompletar, onAbrir = { onAbrirDetalle(tarjeta.evaluada.tarea.id) })
         }
         if (ui.ocultas > 0 || ui.expandido) {
             item {
@@ -214,9 +183,10 @@ private fun TarjetaTarea(
     tarjeta: TarjetaUi,
     onAvance: (Tarea) -> Unit,
     onCompletar: (Long) -> Unit,
+    onAbrir: () -> Unit,
 ) {
     val (tarea, evaluacion) = tarjeta.evaluada.let { it.tarea to it.evaluacion }
-    Card(Modifier.fillMaxWidth()) {
+    Card(onClick = onAbrir, modifier = Modifier.fillMaxWidth()) {
         Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceBetween,
                 modifier = Modifier.fillMaxWidth()) {
@@ -229,37 +199,6 @@ private fun TarjetaTarea(
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 OutlinedButton(onClick = { onAvance(tarea) }) { Text(stringResource(R.string.accion_avance)) }
                 FilledTonalButton(onClick = { onCompletar(tarea.id) }) { Text(stringResource(R.string.accion_completar)) }
-            }
-        }
-    }
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-private fun HojaAvance(tarea: Tarea, onGuardar: (Int) -> Unit, onCerrar: () -> Unit) {
-    var valor by rememberSaveable(tarea.id) { mutableFloatStateOf(tarea.progreso.toFloat()) }
-    ModalBottomSheet(onDismissRequest = onCerrar) {
-        Column(
-            Modifier.padding(horizontal = 24.dp).padding(bottom = 24.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp),
-        ) {
-            Text(stringResource(R.string.hoja_avance_titulo), style = MaterialTheme.typography.titleLarge)
-            Text(tarea.titulo, style = MaterialTheme.typography.bodyMedium)
-            Text(stringResource(R.string.progreso_valor, valor.roundToInt()), style = MaterialTheme.typography.headlineSmall)
-            Slider(value = valor, onValueChange = { valor = it }, valueRange = 0f..100f)
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                OutlinedButton(onClick = { valor = (valor + 10).coerceAtMost(100f) }) {
-                    Text(stringResource(R.string.atajo_mas, 10))
-                }
-                OutlinedButton(onClick = { valor = (valor + 25).coerceAtMost(100f) }) {
-                    Text(stringResource(R.string.atajo_mas, 25))
-                }
-                OutlinedButton(onClick = { valor = tarea.progreso.toFloat() }) {
-                    Text(stringResource(R.string.atajo_igual))
-                }
-            }
-            Button(onClick = { onGuardar(valor.roundToInt()) }, modifier = Modifier.fillMaxWidth()) {
-                Text(stringResource(R.string.hoja_guardar))
             }
         }
     }

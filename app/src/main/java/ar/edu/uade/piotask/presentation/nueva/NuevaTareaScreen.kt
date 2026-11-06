@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
@@ -51,6 +52,7 @@ import java.time.format.FormatStyle
 @Composable
 fun NuevaTareaScreen(
     onTerminar: () -> Unit,
+    onEliminada: () -> Unit,
     viewModel: NuevaTareaViewModel = hiltViewModel(),
 ) {
     val categorias by viewModel.categorias.collectAsStateWithLifecycle()
@@ -62,6 +64,21 @@ fun NuevaTareaScreen(
     var tieneFecha by rememberSaveable { mutableStateOf(false) }
     var diaEpoch by rememberSaveable { mutableStateOf<Long?>(null) }
     var mostrarFecha by rememberSaveable { mutableStateOf(false) }
+    var confirmarEliminar by rememberSaveable { mutableStateOf(false) }
+    var cargada by rememberSaveable { mutableStateOf(false) }
+    val original by viewModel.tareaOriginal.collectAsStateWithLifecycle(initialValue = null)
+
+    // Al editar, se completan los campos una sola vez con lo que ya tenía la tarea.
+    LaunchedEffect(original) {
+        val tarea = original
+        if (tarea != null && !cargada) {
+            titulo = tarea.titulo
+            categoriaElegida = tarea.categoriaId
+            tieneFecha = tarea.deadline != null
+            diaEpoch = tarea.deadline?.toEpochDay()
+            cargada = true
+        }
+    }
 
     val categoriaId = categoriaElegida?.takeIf { id -> categorias.any { it.id == id } }
         ?: ultimaCategoriaId?.takeIf { id -> categorias.any { it.id == id } }
@@ -72,6 +89,7 @@ fun NuevaTareaScreen(
         viewModel.eventos.collect { evento ->
             when (evento) {
                 EventoNueva.Guardada -> onTerminar()
+                EventoNueva.Eliminada -> onEliminada()
                 is EventoNueva.Error -> snackbar.showSnackbar(evento.mensaje)
             }
         }
@@ -82,7 +100,10 @@ fun NuevaTareaScreen(
             Modifier.fillMaxSize().padding(padding).padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
-            Text(stringResource(R.string.nueva_titulo), style = MaterialTheme.typography.headlineSmall)
+            Text(
+                stringResource(if (viewModel.editando) R.string.editar_titulo else R.string.nueva_titulo),
+                style = MaterialTheme.typography.headlineSmall,
+            )
 
             OutlinedTextField(
                 value = titulo,
@@ -124,7 +145,30 @@ fun NuevaTareaScreen(
                     enabled = titulo.isNotBlank() && categoriaId != null && (!tieneFecha || fecha != null),
                 ) { Text(stringResource(R.string.guardar)) }
             }
+
+            if (viewModel.editando) {
+                TextButton(onClick = { confirmarEliminar = true }) {
+                    Text(stringResource(R.string.accion_eliminar), color = MaterialTheme.colorScheme.error)
+                }
+            }
         }
+    }
+
+    if (confirmarEliminar) {
+        AlertDialog(
+            onDismissRequest = { confirmarEliminar = false },
+            title = { Text(stringResource(R.string.eliminar_confirmar_titulo)) },
+            text = { Text(stringResource(R.string.eliminar_confirmar_texto)) },
+            confirmButton = {
+                TextButton(onClick = {
+                    confirmarEliminar = false
+                    viewModel.eliminar()
+                }) { Text(stringResource(R.string.accion_eliminar), color = MaterialTheme.colorScheme.error) }
+            },
+            dismissButton = {
+                TextButton(onClick = { confirmarEliminar = false }) { Text(stringResource(R.string.cancelar)) }
+            },
+        )
     }
 
     if (mostrarFecha) {

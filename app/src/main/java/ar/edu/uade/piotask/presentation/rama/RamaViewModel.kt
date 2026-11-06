@@ -2,21 +2,20 @@ package ar.edu.uade.piotask.presentation.rama
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import ar.edu.uade.piotask.R
 import ar.edu.uade.piotask.core.model.Resource
 import ar.edu.uade.piotask.core.model.UiState
-import ar.edu.uade.piotask.domain.model.AccionDeshacible
 import ar.edu.uade.piotask.domain.model.Categoria
 import ar.edu.uade.piotask.domain.model.TareaEvaluada
 import ar.edu.uade.piotask.domain.model.TareasEnAtencion
 import ar.edu.uade.piotask.domain.repository.CategoriaRepository
 import ar.edu.uade.piotask.domain.usecase.CompletarTareaUseCase
-import ar.edu.uade.piotask.domain.usecase.DeshacerAccionUseCase
 import ar.edu.uade.piotask.domain.usecase.ObtenerTareasEnAtencionUseCase
 import ar.edu.uade.piotask.domain.usecase.RegistrarAvanceUseCase
+import ar.edu.uade.piotask.presentation.common.Aviso
+import ar.edu.uade.piotask.presentation.common.AvisosBus
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -24,7 +23,6 @@ import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -41,11 +39,6 @@ data class RamaUi(
     val filtro: Long?,
 )
 
-sealed interface EventoRama {
-    data class TareaCompletada(val accion: AccionDeshacible) : EventoRama
-    data class Error(val mensaje: String) : EventoRama
-}
-
 @HiltViewModel
 @OptIn(ExperimentalCoroutinesApi::class)
 class RamaViewModel @Inject constructor(
@@ -53,16 +46,12 @@ class RamaViewModel @Inject constructor(
     categoriaRepository: CategoriaRepository,
     private val completarTarea: CompletarTareaUseCase,
     private val registrarAvance: RegistrarAvanceUseCase,
-    private val deshacerAccion: DeshacerAccionUseCase,
+    private val avisos: AvisosBus,
 ) : ViewModel() {
 
     private val filtro = MutableStateFlow<Long?>(null)
     private val expandido = MutableStateFlow(false)
     private val reintento = MutableStateFlow(0)
-    private val canalEventos = Channel<EventoRama>(Channel.BUFFERED)
-
-    val eventos: Flow<EventoRama> = canalEventos.receiveAsFlow()
-
     /** Room es la fuente de verdad: cualquier cambio en las tareas recalcula la Rama sola. */
     val uiState: StateFlow<UiState<RamaUi>> = reintento
         .flatMapLatest {
@@ -125,8 +114,8 @@ class RamaViewModel @Inject constructor(
     fun completar(tareaId: Long) {
         viewModelScope.launch {
             when (val resultado = completarTarea(tareaId)) {
-                is Resource.Success -> canalEventos.send(EventoRama.TareaCompletada(resultado.data))
-                is Resource.Error -> canalEventos.send(EventoRama.Error(resultado.message))
+                is Resource.Success -> avisos.enviar(Aviso.Deshacible(R.string.snack_completada, resultado.data))
+                is Resource.Error -> avisos.enviar(Aviso.Simple(resultado.message))
             }
         }
     }
@@ -134,14 +123,7 @@ class RamaViewModel @Inject constructor(
     fun registrarAvance(tareaId: Long, progreso: Int) {
         viewModelScope.launch {
             val resultado = registrarAvance.invoke(tareaId, progreso)
-            if (resultado is Resource.Error) canalEventos.send(EventoRama.Error(resultado.message))
-        }
-    }
-
-    fun deshacer(accion: AccionDeshacible) {
-        viewModelScope.launch {
-            val resultado = deshacerAccion(accion)
-            if (resultado is Resource.Error) canalEventos.send(EventoRama.Error(resultado.message))
+            if (resultado is Resource.Error) avisos.enviar(Aviso.Simple(resultado.message))
         }
     }
 }

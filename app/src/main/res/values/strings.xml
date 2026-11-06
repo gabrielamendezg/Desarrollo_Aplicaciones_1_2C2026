@@ -58,4 +58,31 @@
     <string name="cancelar">Cancelar</string>
 
     <string name="ajustes_proximamente">Los ajustes y las categorías llegan en el próximo paso.</string>
+
+    <string name="accion_posponer">Posponer</string>
+    <string name="accion_editar">Editar</string>
+    <string name="accion_eliminar">Eliminar</string>
+    <string name="accion_volver">Volver</string>
+    <string name="snack_pospuesta">Tarea pospuesta</string>
+
+    <string name="hoja_posponer_titulo">Posponer hasta</string>
+    <string name="hoja_posponer_aviso">La tarea pasa al Nido hasta esa fecha. Posponer no cuenta como avance.</string>
+    <string name="pos_manana">Mañana</string>
+    <string name="pos_3_dias">En 3 días</string>
+    <string name="pos_semana">En 1 semana</string>
+    <string name="pos_fecha">Elegir otra fecha</string>
+
+    <string name="detalle_por_que">Por qué aparece en la Rama</string>
+    <string name="detalle_ultimo_avance_hoy">Último avance: hoy</string>
+    <plurals name="detalle_ultimo_avance">
+        <item quantity="one">Último avance: hace %1$d día</item>
+        <item quantity="other">Último avance: hace %1$d días</item>
+    </plurals>
+    <string name="detalle_creada">Creada el %1$s</string>
+    <string name="detalle_completada">Esta tarea está completada.</string>
+    <string name="detalle_no_existe">Esta tarea ya no existe.</string>
+
+    <string name="editar_titulo">Editar tarea</string>
+    <string name="eliminar_confirmar_titulo">¿Eliminar esta tarea?</string>
+    <string name="eliminar_confirmar_texto">Se borra junto con su historial y no se puede deshacer.</string>
 </resources>

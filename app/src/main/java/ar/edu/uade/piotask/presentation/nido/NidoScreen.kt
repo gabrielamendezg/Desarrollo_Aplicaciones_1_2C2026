@@ -31,7 +31,7 @@ import ar.edu.uade.piotask.presentation.common.EtiquetaEstado
 import ar.edu.uade.piotask.presentation.common.texto
 
 @Composable
-fun NidoScreen(viewModel: NidoViewModel = hiltViewModel()) {
+fun NidoScreen(onAbrirDetalle: (Long) -> Unit, viewModel: NidoViewModel = hiltViewModel()) {
     val estado by viewModel.uiState.collectAsStateWithLifecycle()
 
     Box(Modifier.fillMaxSize()) {
@@ -56,7 +56,7 @@ fun NidoScreen(viewModel: NidoViewModel = hiltViewModel()) {
                                 Encabezado(grupo)
                             }
                             items(grupo.tareas, key = { it.tarea.id }) { evaluada ->
-                                FilaNido(evaluada.tarea.titulo, evaluada)
+                                FilaNido(evaluada.tarea.titulo, evaluada, onAbrir = { onAbrirDetalle(evaluada.tarea.id) })
                             }
                         }
                     }
@@ -83,8 +83,8 @@ private fun Encabezado(grupo: GrupoNido) {
 }
 
 @Composable
-private fun FilaNido(titulo: String, evaluada: TareaEvaluada) {
-    Card(Modifier.fillMaxWidth()) {
+private fun FilaNido(titulo: String, evaluada: TareaEvaluada, onAbrir: () -> Unit) {
+    Card(onClick = onAbrir, modifier = Modifier.fillMaxWidth()) {
         Column(Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
             EtiquetaEstado(evaluada.evaluacion.estado)
             Text(titulo, style = MaterialTheme.typography.titleSmall)
